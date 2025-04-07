@@ -1,8 +1,11 @@
-venv/
-env/
-ENV/
+venv
+env
+ENV
 .env
 
-__pycache__/
+__pycache__
 
 db.sqlite3
+
+*.code-workspace
+django-saas.code-workspace
