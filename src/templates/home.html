@@ -4,6 +4,13 @@
 
 {% block content %}
 <h1>Home</h1>
-
+<p> Page visits: {{ page_qs.count }}</p>
+<p> Total visits: {{ qs.count }}</p>
+    {% if qs.count > 0 %}
+        <p> Percentage: {% widthratio page_qs.count qs.count 100 %}%</p>
+    {% else %}
+        <p> Percentage: 0%</p>
+    {% endif %}
 {% include 'snippets/welcome-user-msg.html' %}
+
 {% endblock content %}
