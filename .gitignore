@@ -9,3 +9,10 @@ db.sqlite3
 
 *.code-workspace
 django-saas.code-workspace
+
+# ignore vendor static files
+src/staticfiles/vendors/
+
+# ignore local-cdn static files
+local-cdn/
+
