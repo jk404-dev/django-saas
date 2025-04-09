@@ -11,6 +11,7 @@ STATICFILES_VENDOR_DIR = getattr(settings, "STATICFILES_VENDOR_DIR")
 VENDOR_STATICFILES =  {
     "flowbite.min.css": "https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css",
     "flowbite.min.js": "https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js",
+    "flowbite.min.js.map": "https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js.map",
 }
 
 
@@ -23,7 +24,7 @@ class Command(BaseCommand):
         for name, url in VENDOR_STATICFILES.items():
             out_path = STATICFILES_VENDOR_DIR / name
             dl_success = download_to_local(url, out_path)
-
+            self.stdout.write(f"Downloading {url} to {out_path}")
             if dl_success:
                 completed_urls.append(url)
             else:
