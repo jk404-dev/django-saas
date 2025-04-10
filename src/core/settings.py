@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
     'crispy_forms',
 ]
 
@@ -203,8 +204,11 @@ STORAGES = {
 }
 
 SOCIALACCOUNT_PROVIDERS = {
-    
+    'github': {
+        "VERIFIED_EMAIL": True,
+    }
 }
+
 
 
 if not DEBUG:
