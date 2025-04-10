@@ -5,3 +5,6 @@ psycopg2-binary
 dj-database-url
 requests
 whitenoise
+django-allauth
+django-widget-tweaks
+django-crispy-forms
