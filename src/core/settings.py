@@ -69,7 +69,9 @@ INSTALLED_APPS = [
     'visits',
     'helpers',
     'commando',
-    
+    'profiles',
+    'subscriptions',
+
     #allauth
     'allauth',
     'allauth.account',

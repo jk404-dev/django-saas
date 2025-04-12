@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %} Profile - {{ profile_user_obj.username }} {% endblock title %}
+
+{% block content %}
+{% include 'snippets/welcome-user-msg.html' %}
+    {% if perms.auth.view_user or profile_user_obj == request.user %}
+        <div>   
+            <ul>
+                <li>Username: {{ profile_user_obj.username }}</li>
+                <li>Email: {{ profile_user_obj.email }}</li>
+                <li>First Name: {{ profile_user_obj.first_name }}</li>
+                <li>Last Name: {{ profile_user_obj.last_name }}</li>
+                <li>Joined on: {{ profile_user_obj.date_joined }}</li>
+                <li>Last Login: {{ profile_user_obj.last_login }}</li>
+                <li>Active: {{ profile_user_obj.is_active }}</li>
+                <li>Staff: {{ profile_user_obj.is_staff }}</li>
+                <li>Superuser: {{ profile_user_obj.is_superuser }}</li>
+                <li>Sync Subscriptions:
+                    {% if sync_subs %}
+                        <ul>
+                            {% for sub in sync_subs %}
+                                <li>{{ sub.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        No sync subscriptions
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    {% else %}
+        <p>You don't have permission to view this page</p>
+    {% endif %}
+{% endblock content %}

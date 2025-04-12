@@ -24,4 +24,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('protected/', pw_protected_view, name='pw_protected_view'),
+    path('profiles/', include('profiles.urls')),
 ]

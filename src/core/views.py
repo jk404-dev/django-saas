@@ -2,6 +2,10 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from visits.models import PageVisit
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+
+LOGIN_URL = settings.LOGIN_URL
 
 
 def home_page_view(request):
