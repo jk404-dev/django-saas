@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, Permission
 # Register your models here.
-from .models import Subscription
+from .models import Subscription, UserSubscription
 
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
@@ -21,3 +21,11 @@ class PermissionAdmin(admin.ModelAdmin):
     ordering = ['content_type__app_label', 'codename']
 
 admin.site.register(Permission, PermissionAdmin)
+
+class UserSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'subscription', 'active']
+    list_filter = ['subscription']
+    search_fields = ['user__username', 'subscription__name']
+    ordering = ['user__username', 'subscription__name']
+
+admin.site.register(UserSubscription, UserSubscriptionAdmin)
