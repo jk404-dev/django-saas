@@ -16,3 +16,4 @@ src/staticfiles/vendors/
 # ignore local-cdn static files
 local-cdn/
 
+.cursor/
