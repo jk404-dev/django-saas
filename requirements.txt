@@ -7,4 +7,4 @@ requests
 whitenoise
 django-allauth
 django-widget-tweaks
-
+stripe

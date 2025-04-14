@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'helpers',
     'commando',
     'profiles',
+    'customers',
     'subscriptions',
 
     #allauth
