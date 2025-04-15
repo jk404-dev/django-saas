@@ -38,7 +38,7 @@ class Subscription(models.Model):
         return f"{self.name} - {self.active}"
 
     class Meta:
-        ordering = ['subscription__order','order', 'featured', '-updated']
+        ordering = ['order', 'featured', '-updated']
         permissions = SUBCRIPTION_PERMISSIONS
 
     def save(self, *args, **kwargs):
