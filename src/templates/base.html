@@ -6,6 +6,7 @@
     <title>{% block title %} {% endblock title %}</title>
 
     {% include 'base/css.html' %}
+    {% block head_css %}{% endblock head_css %}
 
 </head>
 
@@ -15,6 +16,6 @@
     {% endblock content %}
 
     {% include 'base/js.html' %}
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    {% block scripts %}{% endblock scripts %}
 </body>
 </html>

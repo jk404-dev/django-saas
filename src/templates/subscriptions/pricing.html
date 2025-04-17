@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Pricing Plans {% endblock title %}
+
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 md:py-16 text-center">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Choose the Right Plan for You</h1>
+    <p class="text-lg text-gray-600 mb-8">Simple, transparent pricing.</p>
+
+    {% if yearly_qs %}
+    <div class="inline-flex rounded-full border border-gray-300 overflow-hidden mb-10">
+        <button id="monthly-btn" class="py-2 px-6 focus:outline-none transition duration-300 ease-in-out active">Monthly</button>
+        <button id="yearly-btn" class="py-2 px-6 focus:outline-none transition duration-300 ease-in-out">Yearly (Save ~15%)</button>
+    </div>
+    {% endif %}
+
+    <!-- Monthly Plans -->
+    <div id="monthly-plans" class="plans-section active">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for plan in monthly_qs %}
+                {% comment %} Include the pricing card, passing the plan and term {% endcomment %}
+                {% include "subscriptions/snippets/pricing-card.html" with plan=plan term="month" %}
+            {% empty %}
+                <p class="col-span-full text-gray-500">No monthly plans available at this moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Yearly Plans -->
+    {% if yearly_qs %}
+    <div id="yearly-plans" class="plans-section hidden">
+         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for plan in yearly_qs %}
+                {% comment %} Include the pricing card, passing the plan and term {% endcomment %}
+                {% include "subscriptions/snippets/pricing-card.html" with plan=plan term="year" %}
+            {% empty %}
+                <p class="col-span-full text-gray-500">No yearly plans available at this moment.</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'subscriptions/js/pricing_toggle.js' %}"></script>
+{% endblock scripts %}

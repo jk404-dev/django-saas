@@ -27,12 +27,18 @@ class Subscription(models.Model):
     featured = models.BooleanField(default=True, help_text="Featured price will be shown on the subscription page")
     updated = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    features = models.TextField(blank=True, null=True, help_text="Features for pricing card seperated by new line")
 
    
     @property
     def stripe_currency(self):
         return "usd"
-
+    
+    @property
+    def get_features_as_list(self):
+        if self.features is None:
+            return []
+        return [x.strip() for x in self.features.split("\n") if x.strip()]
 
     def __str__(self):
         return f"{self.name} - {self.active}"

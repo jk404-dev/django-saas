@@ -1,0 +1,53 @@
+{% comment %}
+Expects the following context variables:
+- plan: The plan object (with name, price, description, features, slug, is_recommended)
+- term: A string, either 'month' or 'year'
+{% endcomment %}
+
+{% load static %} {# Might be needed if you add static assets specifically to the card #}
+
+{% comment %} Define check_svg here for encapsulation {% endcomment %}
+{% with check_svg='<svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>' %}
+
+<div class="border rounded-lg shadow-md p-6 bg-white {% if plan.is_recommended %}border-2 border-blue-600 relative{% else %}border-gray-200{% endif %}">
+    <div class="flex flex-col h-full">
+        <div class="flex-1">
+            {% if plan.is_recommended %}
+            <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Most Popular</span>
+            {% endif %}
+
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">{{ plan.subscription.name }} Plan</h2>
+            <div class="mb-4">
+                <span class="text-6xl font-bold text-black">${{ plan.price|floatformat:2 }}</span>
+                <span class="text-base font-normal text-gray-600">/ {{ term }}</span> {# Use the passed 'term' variable #}
+            </div>
+            <p class="text-gray-600 mb-6 min-h-[40px]">{{ plan.description|default:"Basic features included." }}</p>
+
+            <ul class="text-left mb-6 space-y-2">
+                {# Check if the related subscription and its features field exist #}
+                {% if plan.subscription and plan.subscription.features %}
+                    {% for feature in plan.subscription.features.splitlines %}
+                        {% if feature %} {# Ensure the line is not empty #}
+                        <li class="flex items-start text-gray-700">
+                            {{ check_svg|safe }}
+                            <span>{{ feature }}</span> {# Display the feature text #}
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {# Optional: You can add a default message or leave it empty if no features #}
+                    <li class="flex items-start text-gray-500">
+                        <svg class="w-5 h-5 text-gray-400 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <span>No specific features listed.</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <a href="{% url 'select_plan' plan.stripe_id %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-center py-3 px-4 rounded-md transition duration-300 ease-in-out no-underline">
+            Choose {{ plan.subscription.name }} Plan
+        </a>
+    </div>
+</div>
+
+
+{% endwith %} {# End of with check_svg #}
