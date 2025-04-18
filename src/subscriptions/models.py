@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.conf import settings
 import helpers
+from django.urls import reverse
 from helpers.billing import create_product
 
 User = settings.AUTH_USER_MODEL
@@ -43,6 +44,9 @@ class Subscription(models.Model):
     def __str__(self):
         return f"{self.name} - {self.active}"
 
+    def get_checkout_url(self):
+        return reverse("sub_price_redirect", kwargs={"subscription_price_id": self.id})
+    
     class Meta:
         ordering = ['order', 'featured', '-updated']
         permissions = SUBCRIPTION_PERMISSIONS

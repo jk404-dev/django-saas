@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import home_page_view, about_page_view, pw_protected_view
 from subscriptions import views as subscription_views
+from checkouts import views as checkout_views
 
 urlpatterns = [
     path('', home_page_view, name='home'),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('protected/', pw_protected_view, name='pw_protected_view'),
     path('profiles/', include('profiles.urls')),
     path('pricing/', subscription_views.subscription_price_view, name='pricing'),
-    path('pricing/<str:interval>/', subscription_views.subscription_price_view, {'interval': "month"}, name='pricing_interval'),
-    path('select-plan/<str:stripe_id>/', subscription_views.select_plan_view, name='select_plan'),
+    path('checkout/sub-price/<str:subscription_price_id>/', checkout_views.product_price_redirect_view, name='sub_price_redirect'),
+    path('checkout/start/', checkout_views.checkout_redirect_view, name='stripe-checkout_start'),
+    path('checkout/success/', checkout_views.checkout_finalize_view, name='stripe-checkout_success'),
 ]
