@@ -1,6 +1,7 @@
 import stripe
 from dotenv import load_dotenv
 import os
+from helpers.date_utils import timestamp_as_datetime
 
 load_dotenv()
 
@@ -95,5 +96,31 @@ def get_checkout_customer_plan(session_id):
     customer_id = checkout_r.customer
     sub_stripe_id = checkout_r.subscription
     sub_r = get_subscription(sub_stripe_id, raw=True)
+    
+    current_period_start = None
+    current_period_end = None
     sub_plan = sub_r.plan
-    return customer_id, sub_plan.id, sub_stripe_id
+    
+    # Last resort: use created date and billing cycle attributes
+    if current_period_start is None and hasattr(sub_r, 'created'):
+        try:
+            current_period_start = timestamp_as_datetime(sub_r.created)
+            print(f"DEBUG: Using created date for period start: {current_period_start}")
+        except Exception as e:
+            print(f"DEBUG: Error using created date: {str(e)}")
+    
+    if current_period_end is None and hasattr(sub_r, 'billing_cycle_anchor') and hasattr(sub_r.plan, 'interval'):
+        import datetime
+        anchor = timestamp_as_datetime(sub_r.billing_cycle_anchor)
+        interval = sub_r.plan.interval
+                
+        if interval == 'month':
+            current_period_end = anchor + datetime.timedelta(days=30)
+        elif interval == 'year':
+            current_period_end = anchor + datetime.timedelta(days=365)
+        elif interval == 'week':
+            current_period_end = anchor + datetime.timedelta(days=7)
+        elif interval == 'day':
+            current_period_end = anchor + datetime.timedelta(days=1)
+    
+    return customer_id, sub_plan.id, sub_stripe_id, current_period_start, current_period_end

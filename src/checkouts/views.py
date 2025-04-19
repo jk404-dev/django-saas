@@ -38,7 +38,7 @@ def checkout_finalize_view(request):
     if not session_id:
         return HttpResponse("Missing session ID.")
         
-    customer_id, stripe_id, sub_stripe_id = get_checkout_customer_plan(session_id)
+    customer_id, stripe_id, sub_stripe_id, current_period_start, current_period_end = get_checkout_customer_plan(session_id)
     
     try:
         price_obj = SubscriptionPrice.objects.get(stripe_id=stripe_id) 
@@ -102,7 +102,9 @@ def checkout_finalize_view(request):
                 _user_sub_obj = UserSubscription.objects.create(
                     user=user_obj, 
                     subscription=sub_obj,
-                    stripe_id=sub_stripe_id 
+                    stripe_id=sub_stripe_id,
+                    current_period_start=current_period_start,
+                    current_period_end=current_period_end
                 )
                 print(f"Created UserSubscription for {user_obj.id} with Stripe ID {sub_stripe_id} within transaction.")
             
@@ -118,13 +120,17 @@ def checkout_finalize_view(request):
                             raise ValueError(f"Failed to cancel old Stripe subscription {old_stripe_id}. Halting update.") from cancel_err
 
                     _user_sub_obj.subscription = sub_obj
-                    _user_sub_obj.stripe_id = sub_stripe_id 
+                    _user_sub_obj.stripe_id = sub_stripe_id
+                    _user_sub_obj.current_period_start = current_period_start
+                    _user_sub_obj.current_period_end = current_period_end
                     _user_sub_obj.save()
                     print(f"Updated UserSubscription for {user_obj.id} to {sub_obj.name} with Stripe ID {sub_stripe_id} within transaction.")
                 
                 elif _user_sub_obj.stripe_id != sub_stripe_id:
                     print(f"WARN: UserSubscription for {user_obj.id} has same plan but different Stripe ID (DB: {_user_sub_obj.stripe_id}, New: {sub_stripe_id}). Updating ID.")
                     _user_sub_obj.stripe_id = sub_stripe_id
+                    _user_sub_obj.current_period_start = current_period_start
+                    _user_sub_obj.current_period_end = current_period_end
                     _user_sub_obj.save() 
 
                 else:
