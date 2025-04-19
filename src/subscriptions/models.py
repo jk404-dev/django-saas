@@ -117,7 +117,16 @@ class UserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True)
     active = models.BooleanField(default=True)
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    overall_period = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    current_period_start = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    current_period_end = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
    
+    def save(self, *args, **kwargs):
+        if (self.current_period_start is not None and self.overall_period is None):
+            self.overall_period = self.current_period_start
+        super().save(*args, **kwargs)
+
 def user_sub_post_save(sender, instance, *args, **kwargs):
     user_sub_instance = instance
     user = user_sub_instance.user

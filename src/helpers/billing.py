@@ -79,3 +79,21 @@ def get_subscription(stripe_id, raw=True):
     if raw:
         return response
     return response.url
+
+def cancel_subscription(stripe_id, raw=True):
+    try:
+        response = stripe.Subscription.delete(stripe_id)
+        if raw:
+            return response 
+        return response.status 
+    except stripe.error.StripeError as e:
+        print(f"ERROR cancelling Stripe subscription {stripe_id}: {e}")
+        raise e 
+
+def get_checkout_customer_plan(session_id):
+    checkout_r = get_checkout_session(session_id, raw=True)
+    customer_id = checkout_r.customer
+    sub_stripe_id = checkout_r.subscription
+    sub_r = get_subscription(sub_stripe_id, raw=True)
+    sub_plan = sub_r.plan
+    return customer_id, sub_plan.id, sub_stripe_id
