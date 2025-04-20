@@ -1,5 +1,8 @@
 from django.shortcuts import render
-from subscriptions.models import SubscriptionPrice
+from subscriptions.models import SubscriptionPrice, UserSubscription
+from django.contrib.auth.decorators import login_required
+import helpers.billing as billing
+from django.contrib.auth.models import User
 # Create your views here.
 def subscription_price_view(request):
     qs = SubscriptionPrice.objects.filter(featured=True)
@@ -10,3 +13,14 @@ def subscription_price_view(request):
 def select_plan_view(request, stripe_id):
     plan = SubscriptionPrice.objects.get(stripe_id=stripe_id)
     return render(request, 'subscriptions/select_plan.html', {'plan': plan})
+
+@login_required
+def user_subscription_view(request):
+    user_sub_obj, created = UserSubscription.objects.get_or_create(user=request.user) 
+    if request.method == 'POST':
+        if user_sub_obj.status.stripe_id:
+            sub_data = billing.get_subscription(user_sub_obj.stripe_id, raw=False)
+            for key, value in sub_data.items():
+                setattr(user_sub_obj, key, value)
+            user_sub_obj.save()
+    return render(request, 'subscriptions/user_detail_view.html', {'user_sub_obj': user_sub_obj})

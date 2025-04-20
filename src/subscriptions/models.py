@@ -114,6 +114,19 @@ class SubscriptionPrice(models.Model):
 
 
 class UserSubscription(models.Model):
+
+    class SubscriptionStatus(models.TextChoices):
+        ACTIVE = "active", "Active"
+        TRIALING = "trialing", "Trialing"
+        INCOMPLETE = "incomplete", "Incomplete"
+        INCOMPLETE_EXPIRED = "incomplete_expired", "Incomplete Expired"
+        PAST_DUE = "past_due", "Past Due"
+        CANCELLED = "cancelled", "Cancelled"
+        UNPAID = "unpaid", "Unpaid"
+        PAUSED = "paused", "Paused"
+        
+
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -121,7 +134,17 @@ class UserSubscription(models.Model):
     overall_period = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     current_period_start = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     current_period_end = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
-   
+    status = models.CharField(max_length=20, null=True, blank=True, choices=SubscriptionStatus.choices)
+
+    @property
+    def billing_cycle_anchor(self):
+        """
+        Optional property to get the billing cycle anchor as a timestamp
+        """
+        if not self.current_period_start:
+            return None
+        return int(self.current_period_start.timestamp())
+
     def save(self, *args, **kwargs):
         if (self.current_period_start is not None and self.overall_period is None):
             self.overall_period = self.current_period_start

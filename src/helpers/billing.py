@@ -96,6 +96,7 @@ def get_checkout_customer_plan(session_id):
     customer_id = checkout_r.customer
     sub_stripe_id = checkout_r.subscription
     sub_r = get_subscription(sub_stripe_id, raw=True)
+    status = sub_r.status
     
     current_period_start = None
     current_period_end = None
@@ -123,4 +124,4 @@ def get_checkout_customer_plan(session_id):
         elif interval == 'day':
             current_period_end = anchor + datetime.timedelta(days=1)
     
-    return customer_id, sub_plan.id, sub_stripe_id, current_period_start, current_period_end
+    return customer_id, sub_plan.id, sub_stripe_id, current_period_start, current_period_end, status
