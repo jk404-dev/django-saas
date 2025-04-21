@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load tz %} {# Load timezone tag if needed for dates #}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Confirm Subscription Cancellation</h1>
+
+    <div class="max-w-lg mx-auto bg-white shadow-lg rounded-lg px-6 sm:px-8 py-8 border border-gray-200">
+
+        <p class="text-lg text-gray-700 mb-4 text-center">
+            Are you sure you want to cancel your subscription to the
+            <strong class="font-semibold">{{ user_sub_obj.subscription.name }}</strong> plan?
+        </p>
+
+        {% if user_sub_obj and user_sub_obj.current_period_end %}
+            {% timezone "UTC" %}
+            <p class="text-sm text-gray-600 mb-8 text-center">
+                If you cancel, your subscription will remain active until the end of your current billing period on
+                <strong class="font-medium">{{ user_sub_obj.current_period_end|date:"F d, Y" }}</strong>.
+                You will not be charged again after cancellation.
+            </p>
+            {% endtimezone %}
+        {% else %}
+            <p class="text-sm text-gray-600 mb-8 text-center">
+                If you cancel, your access will be removed according to the plan terms. You will not be charged again.
+            </p>
+        {% endif %}
+
+        <form method="POST" class="text-center">
+            {% csrf_token %}
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button type="submit"
+                        class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                    Yes, Cancel My Subscription
+                </button>
+                <a href=""  {# Assumes this is the URL name for the detail view #}
+                   class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out no-underline">
+                    No, Keep My Subscription
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

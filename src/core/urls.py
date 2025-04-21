@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('accounts/billing/', subscription_views.user_subscription_view, name='user_subscription'),
+    path('accounts/billing/cancel/', subscription_views.cancel_subscription_view, name='cancel_subscription'),
     path('protected/', pw_protected_view, name='pw_protected_view'),
     path('profiles/', include('profiles.urls')),
     path('pricing/', subscription_views.subscription_price_view, name='pricing'),

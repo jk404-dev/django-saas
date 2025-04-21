@@ -22,15 +22,6 @@
         You can now access your account and enjoy the benefits.
     </p>
 
-    {# Optional: Display checkout session details if needed #}
-    {#
-    {% if checkout %}
-        <div class="text-left p-4 bg-gray-100 rounded mb-6 text-sm text-gray-500 break-words">
-             DEBUG: {{ checkout }}
-        </div>
-    {% endif %}
-    #}
-
     <div class="flex justify-center space-x-4">
         {# --- IMPORTANT --- #}
         {# Replace 'home' and '' with the actual URL names #}
@@ -39,7 +30,7 @@
            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition duration-300 ease-in-out no-underline">
            Go to Dashboard
         </a>
-        <a href="" 
+        <a href="{% url 'user_subscription' %}" 
            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-md transition duration-300 ease-in-out no-underline">
            View Account
         </a>

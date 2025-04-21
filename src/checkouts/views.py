@@ -111,11 +111,10 @@ def checkout_finalize_view(request):
             
             elif _user_sub_obj: 
                 if _user_sub_obj.subscription != sub_obj:
-                    old_stripe_id = _user_sub_obj.stripe_id
-                    if old_stripe_id is not None:
+                    if _user_sub_obj.active is True:
                         try:
-                            cancel_subscription(old_stripe_id)
-                            print(f"Cancelled old Stripe subscription {old_stripe_id}")
+                            cancel_subscription(_user_sub_obj.stripe_id)
+                            print(f"Cancelled old Stripe subscription {_user_sub_obj.stripe_id}")
                         except Exception as cancel_err:
                             print(f"ERROR cancelling old Stripe subscription {old_stripe_id}: {cancel_err}")
                             raise ValueError(f"Failed to cancel old Stripe subscription {old_stripe_id}. Halting update.") from cancel_err

@@ -2,10 +2,8 @@
 {% load tz %}
 
 {% block content %}
-<form method="POST">
-    {% csrf_token %}
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Subscription Details</h1>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Subscription Details</h1>
 
     {% if user_sub_obj and user_sub_obj.stripe_id %}
         <div class="bg-white shadow-lg rounded-lg px-6 sm:px-8 py-6 mb-6 border border-gray-200">
@@ -32,14 +30,15 @@
                 {% if user_sub_obj.current_period_start %}
                     {% timezone "UTC" %}
                     <p>
-                        <strong class="font-medium text-gray-600 w-40 inline-block">Current Period:</strong>
-                        {# Make sure these are datetime objects or use a timestamp filter #}
+                        <strong class="font-medium text-gray-600 w-40 inline-block">{% if user_sub_obj.status == 'active' %}Current Period:{% else %}Period:{% endif %}</strong>
                         {{ user_sub_obj.current_period_start|date:"M d, Y" }} - {{ user_sub_obj.current_period_end|date:"M d, Y" }}
                     </p>
+                    {% if user_sub_obj.status == 'active' %}
                     <p>
                         <strong class="font-medium text-gray-600 w-40 inline-block">Renews/Ends in:</strong>
                         {{ user_sub_obj.current_period_end|timeuntil }}
                     </p>
+                    {% endif %}
                     {% endtimezone %}
                 {% else %}
                      <p>
@@ -48,19 +47,23 @@
                     </p>
                 {% endif %}
 
+                {% if user_sub_obj.status == 'active' %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <strong class="font-medium text-gray-600 block mb-2">Cancel Subscription:</strong>
+                    <a href="{% url 'cancel_subscription' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out no-underline"
+                       onclick="return confirm('Are you sure you want to request cancellation? This will take you to a confirmation step.');">
+                        Request Cancellation
+                    </a>
+                    <p class="text-xs text-gray-500 mt-2">Cancellation will take effect at the end of the current billing period.</p>
+                </div>
+                {% endif %}
             </div>
 
-             {% if portal_url %}
-                <div class="mt-6 border-t pt-6 text-center">
-                     <a href="{{ portal_url }}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out no-underline text-sm sm:text-base">
-                         Manage Billing & Subscription
-                     </a>
-                </div>
-             {% endif %}
-
         </div>
+    {% endif %}
 
-    {% else %}
+    {% if user_sub_obj.status == 'cancelled' or user_sub_obj.status == 'paused' %}
         <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-4 rounded-md shadow" role="alert">
             <p class="font-bold mb-2">No Active Subscription Found</p>
             <p>You currently do not have an active subscription plan.</p>
