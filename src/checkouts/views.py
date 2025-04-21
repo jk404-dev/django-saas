@@ -120,6 +120,7 @@ def checkout_finalize_view(request):
                             raise ValueError(f"Failed to cancel old Stripe subscription {old_stripe_id}. Halting update.") from cancel_err
 
                     _user_sub_obj.subscription = sub_obj
+                    _user_sub_obj.active = True
                     _user_sub_obj.stripe_id = sub_stripe_id
                     _user_sub_obj.current_period_start = current_period_start
                     _user_sub_obj.current_period_end = current_period_end
@@ -129,6 +130,7 @@ def checkout_finalize_view(request):
                 
                 elif _user_sub_obj.stripe_id != sub_stripe_id:
                     print(f"WARN: UserSubscription for {user_obj.id} has same plan but different Stripe ID (DB: {_user_sub_obj.stripe_id}, New: {sub_stripe_id}). Updating ID.")
+                    _user_sub_obj.active = True
                     _user_sub_obj.stripe_id = sub_stripe_id
                     _user_sub_obj.current_period_start = current_period_start
                     _user_sub_obj.current_period_end = current_period_end
