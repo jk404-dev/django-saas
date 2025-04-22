@@ -23,7 +23,7 @@
                  {# Conditional Buttons - Preserve existing styling #}
                  {% if user.is_authenticated %}
                      {# Primary Button (Existing Style) #}
-                     <a href="#" {# Link to this page or specific dashboard section #}
+                     <a href="{% url 'dashboard' %}" {# Link to this page or specific dashboard section #}
                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out no-underline">
                         View Dashboard
                      </a>

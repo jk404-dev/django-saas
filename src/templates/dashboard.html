@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %} {# Load static for potential future use, like custom dashboard JS or CSS #}
+{% load tz %}    {# Load timezone filters if you display timestamps #}
+
+{% block title %} Dashboard {% endblock title %}
+
+{% block content %}
+
+{# --- Main Content Area --- #}
+{# Assumes base.html provides a suitable background (e.g., bg-gray-100) #}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    {# --- Welcome Section --- #}
+    <div class="mb-8 p-6 bg-white rounded-lg shadow border border-gray-200">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+            {# Left Side: Welcome Message #}
+            <div>
+                {# Include the snippet for the main welcome message #}
+                {# Ensure 'snippets/welcome-user-msg.html' exists and contains something like: #}
+                {# <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">Welcome back, {{ user.username|default:'Guest' }}!</h2> #}
+                {% include 'snippets/welcome-user-msg.html' %}
+
+                {% if user.is_authenticated %}
+                    {# --- Subscription Status Snippet (Optional but Recommended) --- #}
+                    {% if user_sub_obj and user_sub_obj.stripe_id %}
+                        <p class="mt-1 text-sm text-gray-600">
+                            Your <strong class="font-medium">{{ user_sub_obj.subscription.name }}</strong> plan is currently
+                            <span class="font-semibold px-1.5 py-0.5 rounded text-xs
+                                {% if user_sub_obj.status == 'active' %} bg-green-100 text-green-800 border border-green-200
+                                {% elif user_sub_obj.status == 'trialing' %} bg-blue-100 text-blue-800 border border-blue-200
+                                {% elif user_sub_obj.status == 'past_due' %} bg-yellow-100 text-yellow-800 border border-yellow-200
+                                {% elif user_sub_obj.status == 'canceled' or user_sub_obj.status == 'unpaid' %} bg-red-100 text-red-800 border border-red-200
+                                {% else %} bg-gray-100 text-gray-800 border border-gray-200 {% endif %}">
+                                {{ user_sub_obj.status|title }}
+                            </span>.
+                            {% if user_sub_obj.status == 'active' and user_sub_obj.current_period_end %}
+                                {% timezone "UTC" %}
+                                It renews in {{ user_sub_obj.current_period_end|timeuntil }}.
+                                {% endtimezone %}
+                            {% elif user_sub_obj.status == 'trialing' and user_sub_obj.trial_end %}
+                                {% timezone "UTC" %}
+                                Your trial ends in {{ user_sub_obj.trial_end|timeuntil }}.
+                                {% endtimezone %}
+                            {% endif %}
+                        </p>
+                    {% else %}
+                         <p class="mt-1 text-sm text-gray-600">
+                           You currently don't have an active subscription.
+                        </p>
+                    {% endif %}
+                {% else %}
+                     <p class="mt-1 text-sm text-gray-600">
+                       Log in to access your account and subscription details.
+                    </p>
+                {% endif %}
+            </div>
+
+            {# Right Side: Action Buttons #}
+            <div class="flex-shrink-0 flex flex-col sm:flex-row gap-x-2 gap-y-2 w-full sm:w-auto">
+                 {% if user.is_authenticated %}
+                     {# Primary Button: Link to subscription page #}
+                     <a href="{% url 'user_subscription' %}"
+                       class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out no-underline">
+                        Manage Subscription
+                     </a>
+                      {# Secondary Button: Link to pricing page or other key action #}
+                     <a href="{% url 'pricing' %}"
+                        class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out no-underline">
+                        Explore Plans
+                     </a>
+                 {% else %}
+                     {# Fallback for logged out users #}
+                     <a href="{% url 'account_login' %}"
+                       class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out no-underline">
+                        Login
+                     </a>
+                      <a href="{% url 'account_signup' %}"
+                        class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out no-underline">
+                        Sign Up
+                     </a>
+                 {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# --- Statistics Section (Requires data from view context) --- #}
+    {% if user.is_authenticated %}
+    {# You might only show stats relevant to the user's subscription or activity #}
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-3">Your Activity Overview</h2>
+        {# Example: Only show stats if they have data #}
+        {% if page_qs or qs %}
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+            {# Stat Card 1: Example - Active Projects / Items Created (Replace with your metric) #}
+            <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <dt class="text-sm font-medium text-gray-500 truncate">Active Projects</dt> {# Customize Title #}
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ user_projects_count|default:0 }}</dd> {# Pass this from view #}
+                        </div>
+                        <div class="flex-shrink-0">
+                             {# Example Icon (Briefcase) #}
+                             <svg class="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.07a2.25 2.25 0 0 1-2.25 2.25h-12a2.25 2.25 0 0 1-2.25-2.25v-4.07m16.5 0a2.25 2.25 0 0 0-2.25-2.25h-12a2.25 2.25 0 0 0-2.25 2.25m16.5 0v-4.07a2.25 2.25 0 0 0-2.25-2.25h-12a2.25 2.25 0 0 0-2.25 2.25v4.07m16.5 0h-16.5" />
+                             </svg>
+                        </div>
+                    </div>
+                    {# Optional: Add change indicator if you track it #}
+                    {# <div class="mt-2 text-sm font-medium text-green-600"> +2 this week </div> #}
+                </div>
+            </div>
+
+            {# Stat Card 2: Example - API Usage / Credits Used (Replace with your metric) #}
+            <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                 <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <dt class="text-sm font-medium text-gray-500 truncate">API Credits Used</dt> {# Customize Title #}
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ api_credits_used|default:0 }} / {{ api_credit_limit|default:'N/A' }}</dd> {# Pass from view #}
+                        </div>
+                        <div class="flex-shrink-0">
+                            {# Example Icon (Chip) #}
+                             <svg class="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
+                             </svg>
+                        </div>
+                    </div>
+                     {# Optional: Add change indicator #}
+                     {# <div class="mt-2 text-sm font-medium text-yellow-600"> Nearing limit </div> #}
+                </div>
+            </div>
+
+            {# Stat Card 3: Example - Logins This Month (Replace with your metric) #}
+            <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                 <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <dt class="text-sm font-medium text-gray-500 truncate">Logins (This Month)</dt> {# Customize Title #}
+                             <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ monthly_logins|default:0 }}</dd> {# Pass from view #}
+                        </div>
+                         <div class="flex-shrink-0">
+                            {# Example Icon (Key) #}
+                             <svg class="h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                             </svg>
+                        </div>
+                    </div>
+                     {# Optional: Add change indicator #}
+                     {# <div class="mt-2 text-sm font-medium text-gray-500"> Consistent activity </div> #}
+                </div>
+            </div>
+
+        </div>
+        {% else %}
+         {# Optional: Message if no stats are available/applicable yet #}
+         {# <p class="text-gray-500 text-sm">No activity overview available yet.</p> #}
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+    {# --- "Quick Actions" Section (Refined "What would you like to do?") --- #}
+    {% if user.is_authenticated %}
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-3">Quick Actions</h2>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"> {# Changed to 3 columns for more actions #}
+
+             {# Action Card 1: Manage Subscription (Keep as is) #}
+             <a href="{% url 'user_subscription' %}" class="block bg-white p-6 rounded-lg shadow border border-gray-200 hover:shadow-md transition group no-underline">
+                <div class="flex items-center justify-between">
+                     <div class="flex items-center space-x-4">
+                          <div class="bg-blue-100 rounded-full p-2 flex-shrink-0">
+                               <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM16.5 6v1.875m0 0a4.5 4.5 0 1 0-9 0m9 0a4.5 4.5 0 1 1-9 0m9 0v9.375m-3-8.25v.75m-3-3.75v.75m3 3v.75m-3-4.5v.75M12 21a8.25 8.25 0 0 0 8.25-8.25H3.75A8.25 8.25 0 0 0 12 21Z" />
+                               </svg>
+                         </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-900 group-hover:text-blue-600">Manage Subscription</h3>
+                            <p class="text-sm text-gray-500">View plan, billing, or cancel</p> {# Slightly shorter text #}
+                        </div>
+                     </div>
+                     <svg class="h-5 w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                         <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+                     </svg>
+                </div>
+             </a>
+
+             {# Action Card 2: Explore Plans (Keep as is) #}
+             <a href="{% url 'pricing' %}" class="block bg-white p-6 rounded-lg shadow border border-gray-200 hover:shadow-md transition group no-underline">
+                 <div class="flex items-center justify-between">
+                     <div class="flex items-center space-x-4">
+                          <div class="bg-blue-100 rounded-full p-2 flex-shrink-0">
+                             <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                             </svg>
+                         </div>
+                         <div>
+                            <h3 class="text-base font-semibold text-gray-900 group-hover:text-blue-600">Explore Plans</h3>
+                            <p class="text-sm text-gray-500">See available subscription options</p> {# Slightly shorter text #}
+                        </div>
+                     </div>
+                      <svg class="h-5 w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                         <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+                     </svg>
+                 </div>
+             </a>
+
+             {# Action Card 3: Example - View Documentation / Help #}
+             <a href="#" {# Replace with your docs/help URL #} class="block bg-white p-6 rounded-lg shadow border border-gray-200 hover:shadow-md transition group no-underline">
+                 <div class="flex items-center justify-between">
+                     <div class="flex items-center space-x-4">
+                          <div class="bg-blue-100 rounded-full p-2 flex-shrink-0">
+                             {# Example Icon (Book Open) #}
+                             <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" />
+                             </svg>
+                         </div>
+                         <div>
+                            <h3 class="text-base font-semibold text-gray-900 group-hover:text-blue-600">Get Help</h3>
+                            <p class="text-sm text-gray-500">Read documentation or contact support</p>
+                        </div>
+                     </div>
+                      <svg class="h-5 w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                         <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+                     </svg>
+                 </div>
+             </a>
+
+             {# Add more action cards as needed #}
+
+        </div>
+    </div>
+    {% endif %}
+
+    {# --- Recent Activity Section (Requires data from view context) --- #}
+    {% if user.is_authenticated and recent_activity %} {# Check if recent_activity exists in context #}
+    <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Activity</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Latest updates related to your account.</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <ul role="list" class="divide-y divide-gray-200">
+                {% for activity in recent_activity|slice:":5" %} {# Show latest 5 activities #}
+                <li class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                    {# Make the link point to relevant detail page if applicable #}
+                    <a href="{{ activity.get_absolute_url|default:'#' }}" class="block px-4 py-4 sm:px-6 no-underline">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center text-sm">
+                                {# Example: Use different icons/colors based on activity type #}
+                                {% if 'renewed' in activity.description|lower or 'activated' in activity.description|lower %}
+                                    <span class="h-2 w-2 rounded-full bg-green-500 mr-3 flex-shrink-0"></span>
+                                    <p class="font-medium text-blue-600 truncate mr-1">Subscription Update:</p>
+                                {% elif 'payment' in activity.description|lower %}
+                                     <span class="h-2 w-2 rounded-full bg-blue-500 mr-3 flex-shrink-0"></span>
+                                     <p class="font-medium text-blue-600 truncate mr-1">Billing:</p>
+                                {% elif 'cancel' in activity.description|lower %}
+                                     <span class="h-2 w-2 rounded-full bg-red-500 mr-3 flex-shrink-0"></span>
+                                     <p class="font-medium text-blue-600 truncate mr-1">Subscription Update:</p>
+                                {% else %}
+                                    <span class="h-2 w-2 rounded-full bg-gray-400 mr-3 flex-shrink-0"></span>
+                                    <p class="font-medium text-blue-600 truncate mr-1">Account:</p>
+                                {% endif %}
+                                <p class="text-gray-700 truncate">{{ activity.description }}</p> {# Pass description from view #}
+                            </div>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-600">
+                                    {% timezone "UTC" %}
+                                    {{ activity.timestamp|timesince }} ago {# Pass timestamp from view #}
+                                    {% endtimezone %}
+                                </p>
+                                <svg class="ml-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {% empty %}
+                 <li class="px-4 py-4 sm:px-6 text-sm text-gray-500">
+                    No recent activity found.
+                 </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {# Optional: Link to view all activity #}
+        {% if recent_activity.count > 5 %}
+        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t border-gray-200">
+             <a href="#" {# Link to full activity log page #} class="text-sm font-medium text-blue-600 hover:text-blue-800 no-underline">
+                View all activity &rarr;
+             </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block scripts %}
+    {# Add any dashboard-specific JS here if needed #}
+    {{ block.super }} {# Include scripts from base.html #}
+{% endblock scripts %}

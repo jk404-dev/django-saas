@@ -34,3 +34,6 @@ def pw_protected_view(request):
     else:
         return render(request, 'protected/entry.html')
 
+def dashboard_page_view(request):
+    return render(request, 'dashboard.html')
+
